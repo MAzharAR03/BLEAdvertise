@@ -166,6 +166,28 @@ class MainActivity : ComponentActivity() {
         setContent {
             BLEAdvertiseTheme {
                 val navController = rememberNavController()
+                val context = LocalContext.current
+
+                LaunchedEffect(connectionState) {
+                    if (connectionState == ConnectionState.CONNECTED) {
+                        Toast.makeText(context, "Connected to PC", Toast.LENGTH_SHORT).show()
+                    }
+                }
+
+                if (connectionState == ConnectionState.DISCONNECTED) {
+                    AlertDialog(
+                        onDismissRequest = {},
+                        title = { Text("Disconnected") },
+                        text = { Text("The PC server disconnected unexpectedly.") },
+                        confirmButton = {
+                            Button(onClick = {
+                                connectionState = ConnectionState.IDLE
+                                navController.popBackStack("home", inclusive = false)
+                            }) { Text("OK") }
+                        }
+                    )
+                }
+
                 NavHost(navController = navController, startDestination = "home"){
                     composable("home"){
                         HomeScreen(
@@ -191,11 +213,6 @@ class MainActivity : ComponentActivity() {
                         }
                         AdvertiseScreen(
                             uiLayout = uiLayout,
-                            connectionState = connectionState,
-                            onDisconnectConfirmed = {
-                                connectionState = ConnectionState.IDLE
-                                navController.popBackStack()
-                            },
                             onButtonStateChanged = {
                                 name, isPressed ->
                                 val btn = uiLayout.buttons.find {it.text == name }
@@ -707,26 +724,7 @@ fun Context.hasRequiredBluetoothPermissions(): Boolean {
 fun AdvertiseScreen(
     onButtonStateChanged: (String, Boolean) -> Unit,
     uiLayout: UIConfig,
-    connectionState: ConnectionState,
-    onDisconnectConfirmed: () -> Unit,
 ) {
-    val context = LocalContext.current
-    LaunchedEffect(connectionState) {
-        if (connectionState == ConnectionState.CONNECTED){
-            Toast.makeText(context, "Conntected to PC", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    if (connectionState == ConnectionState.DISCONNECTED){
-        AlertDialog(
-            onDismissRequest = {},
-            title = { Text("Disconnected")},
-            text = { Text("The PC server disconnected unexpectedly.")},
-            confirmButton = {
-                Button(onClick = onDisconnectConfirmed) {Text("OK")}
-            }
-        )
-    }
     PixelLayout(uiLayout,onButtonStateChanged)
 }
 
