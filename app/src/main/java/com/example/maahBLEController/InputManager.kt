@@ -57,6 +57,7 @@ class InputManager(
         }
     }
     private var currentPitch = 0.0
+    private var rollReportingEnabled = true
     private var currentRoll = 0.0
     private var currentGravity: List<Float> = listOf(0f,0f,0f)
     private var currentLinearAccel = listOf(0f,0f,0f)
@@ -85,7 +86,7 @@ class InputManager(
                 val controllerState = JSONObject()
                 try{
                     controllerState.put("stepping",stepDetector.isCurrentlyStepping)
-                    controllerState.put("roll", currentRoll)
+                    controllerState.put("roll", if (rollReportingEnabled) currentRoll else 0.0)
                     controllerState.put("pitch",currentPitch)
                     val buttonArray = JSONArray()
                     buttonStates.forEach {
@@ -165,4 +166,16 @@ class InputManager(
     fun resetCalibration() {
         isCalibrated = false
     }
+
+    fun configureRollGate(hasRollHoldButton: Boolean) {
+        rollReportingEnabled = !hasRollHoldButton
+    }
+
+    fun setRollHold(isHeld: Boolean) {
+        rollReportingEnabled = isHeld
+        if (isHeld) {
+            recenter()
+        }
+    }
+
 }

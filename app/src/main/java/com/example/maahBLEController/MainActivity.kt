@@ -133,6 +133,7 @@ class MainActivity : ComponentActivity() {
     private fun loadLayout(filename: String){
         uiLayout = LayoutParser(filename,this).apply {readJSON()}.getNewUI()
         inputManager.setButtons(uiLayout.buttons)
+        inputManager.configureRollGate(uiLayout.buttons.any { it.type == "rollHold" })
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -220,6 +221,7 @@ class MainActivity : ComponentActivity() {
                                     "screenshot" -> if (isPressed) writeToChar("Screenshot", screenshotUUID, confirm = false)
                                     "pause" -> if (isPressed) writeToChar("Pause", pauseUUID, confirm = false)
                                     "recenter" -> if(isPressed) inputManager.recenter()
+                                    "rollHold" -> inputManager.setRollHold(isPressed)
                                     else -> inputManager.updateButtonState(name, isPressed)
                                 }
                             }
